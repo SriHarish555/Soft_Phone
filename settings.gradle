@@ -1,0 +1,26 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        maven { url "https://plugins.gradle.org/m2/" }
+        mavenCentral()
+
+        maven {
+            name "linphone.org maven repository"
+            url "https://linphone.org/maven_repository"
+            content {
+                includeGroup "org.linphone"
+            }
+        }
+    }
+}
+
+rootProject.name = "Hello World"
+include ':app'
