@@ -127,7 +127,7 @@ class MainActivity : AppCompatActivity() {
         val clonedParams = params.clone()
 
         // Now let's make our changes
-//        clonedParams.registerEnabled = false
+//        clonedParams.registerEnabled = fal
 
         // And apply them
         account.params = clonedParams
