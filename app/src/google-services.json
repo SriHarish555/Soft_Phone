@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "115402755291",
+    "project_id": "soft-phone-3d0ec",
+    "storage_bucket": "soft-phone-3d0ec.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:115402755291:android:72347c4da0a4cd879050fe",
+        "android_client_info": {
+          "package_name": "com.sece_connect.helloworld"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-UVwcgIytCwaqJi9bG3D3suTf8gwyjgk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,10 +2,13 @@ package com.sece_connect.helloworld
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.RadioGroup
 import android.widget.TextView
+import android.widget.Toast
 import org.linphone.core.*
 import org.linphone.core.tools.Log
 
@@ -23,7 +26,9 @@ class MainActivity : AppCompatActivity() {
             if (state == RegistrationState.Failed || state == RegistrationState.Cleared) {
                 findViewById<Button>(R.id.connect).isEnabled = true
             } else if (state == RegistrationState.Ok) {
-                findViewById<Button>(R.id.disconnect).isEnabled = true
+                findViewById<LinearLayout>(R.id.register_layout).visibility =
+                    View.GONE
+                findViewById<TextView>(R.id.push_info).text = account.params.contactUriParameters
             }
         }
     }
@@ -40,18 +45,6 @@ class MainActivity : AppCompatActivity() {
             login()
             it.isEnabled = false
         }
-
-        findViewById<Button>(R.id.disconnect).setOnClickListener {
-            unregister()
-            it.isEnabled = false
-        }
-
-        findViewById<Button>(R.id.delete).setOnClickListener {
-            delete()
-            it.isEnabled = false
-        }
-        val coreVersion = findViewById<TextView>(R.id.core_version)
-        coreVersion.text = core.version
     }
 
     private fun login() {
@@ -77,72 +70,38 @@ class MainActivity : AppCompatActivity() {
         val authInfo = Factory.instance().createAuthInfo(username, null, password, null, null, domain, null)
 
         // Account object replaces deprecated ProxyConfig object
+        val params = core.createAccountParams()
         // Account object is configured through an AccountParams object that we can obtain from the Core
-        val accountParams = core.createAccountParams()
 
         // A SIP account is identified by an identity address that we can construct from the username and domain
         val identity = Factory.instance().createAddress("sip:$username@$domain")
-        accountParams.identityAddress = identity
+        params.identityAddress = identity
 
         // We also need to configure where the proxy server is located
         val address = Factory.instance().createAddress("sip:$domain")
         // We use the Address object to easily set the transport protocol
         address?.transport = transportType
-        accountParams.serverAddress = address
+        params.serverAddress=address
         // And we ensure the account will start the registration process
-//        accountParams.registerEnabled = true
+//        params.registerEnabled = true
 
         // Now that our AccountParams is configured, we can create the Account object
-        val account = core.createAccount(accountParams)
+        params.pushNotificationAllowed=true
+
+        core.addAuthInfo(authInfo)
+        val account = core.createAccount(params)
 
         // Now let's add our objects to the Core
-        core.addAuthInfo(authInfo)
+
         core.addAccount(account)
 
         // Also set the newly added account as default
         core.defaultAccount = account
-
-        // Allow account to be removed
-        findViewById<Button>(R.id.delete).isEnabled = true
-
-        // To be notified of the connection status of our account, we need to add the listener to the Core
         core.addListener(coreListener)
-        // We can also register a callback on the Account object
-        account.addListener { _, state, message ->
-            // There is a Log helper in org.linphone.core.tools package
-            Log.i("[Account] Registration state changed: $state, $message")
-        }
-
-        // Finally we need the Core to be started for the registration to happen (it could have been started before)
         core.start()
-    }
 
-    private fun unregister() {
-        // Here we will disable the registration of our Account
-        val account = core.defaultAccount
-        account ?: return
-
-        val params = account.params
-        // Returned params object is const, so to make changes we first need to clone it
-        val clonedParams = params.clone()
-
-        // Now let's make our changes
-//        clonedParams.registerEnabled = false
-
-        // And apply them
-        account.params = clonedParams
-    }
-
-    private fun delete() {
-        // To completely remove an Account
-        val account = core.defaultAccount
-        account ?: return
-        core.removeAccount(account)
-
-        // To remove all accounts use
-        core.clearAccounts()
-
-        // Same for auth info
-        core.clearAllAuthInfo()
+        if (!core.isPushNotificationAvailable) {
+            Toast.makeText(this, "Something is wrong with the push setup!", Toast.LENGTH_LONG).show()
+        }
     }
 }

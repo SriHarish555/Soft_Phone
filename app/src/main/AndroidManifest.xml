@@ -21,6 +21,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name="org.linphone.core.tools.firebase.FirebaseMessaging"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <receiver android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="org.linphone.core.action.PUSH_RECEIVED"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
