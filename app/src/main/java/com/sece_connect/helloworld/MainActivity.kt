@@ -1,16 +1,18 @@
 package com.sece_connect.helloworld
 
 import androidx.appcompat.app.AppCompatActivity
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.RadioGroup
+import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import org.linphone.core.*
-import org.linphone.core.tools.Log
 
 
 
@@ -23,12 +25,51 @@ class MainActivity : AppCompatActivity() {
             // Otherwise, we will be Failed.
             findViewById<TextView>(R.id.registration_status).text = message
 
-            if (state == RegistrationState.Failed || state == RegistrationState.Cleared) {
+            if (state == RegistrationState.Failed ) {
                 findViewById<Button>(R.id.connect).isEnabled = true
             } else if (state == RegistrationState.Ok) {
                 findViewById<LinearLayout>(R.id.register_layout).visibility =
                     View.GONE
-                findViewById<TextView>(R.id.push_info).text = account.params.contactUriParameters
+                findViewById<RelativeLayout>(R.id.call_layout).visibility = View.VISIBLE
+            }
+        }
+
+        override fun onAudioDeviceChanged(core: Core, audioDevice: AudioDevice) {
+            // This callback will be triggered when a successful audio device has been changed
+        }
+        override fun onAudioDevicesListUpdated(core: Core) {
+            // This callback will be triggered when the available devices list has changed,
+            // for example after a bluetooth headset has been connected/disconnected.
+        }
+
+        override fun onCallStateChanged(
+            core: Core,
+            call: Call,
+            state: Call.State?,
+            message: String
+        ){
+            findViewById<TextView>(R.id.call_status).text = message
+
+            // When a call is received
+            when (state) {
+                Call.State.IncomingReceived -> {
+                    findViewById<Button>(R.id.hang_up).isEnabled = true
+                    findViewById<Button>(R.id.answer).isEnabled = true
+                    findViewById<EditText>(R.id.remote_address).setText(call.remoteAddress.asStringUriOnly())
+                }
+                Call.State.Connected -> {
+                    findViewById<Button>(R.id.mute_mic).isEnabled = true
+                    findViewById<Button>(R.id.toggle_speaker).isEnabled = true
+                }
+                Call.State.Released -> {
+                    findViewById<Button>(R.id.hang_up).isEnabled = false
+                    findViewById<Button>(R.id.answer).isEnabled = false
+                    findViewById<Button>(R.id.mute_mic).isEnabled = false
+                    findViewById<Button>(R.id.toggle_speaker).isEnabled = false
+                    findViewById<EditText>(R.id.remote_address).text.clear()
+                }
+
+                else -> {}
             }
         }
     }
@@ -44,6 +85,54 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.connect).setOnClickListener {
             login()
             it.isEnabled = false
+        }
+        findViewById<Button>(R.id.hang_up).isEnabled = false
+        findViewById<Button>(R.id.answer).isEnabled = false
+        findViewById<Button>(R.id.mute_mic).isEnabled = false
+        findViewById<Button>(R.id.toggle_speaker).isEnabled = false
+        findViewById<EditText>(R.id.remote_address).isEnabled = false
+
+        findViewById<Button>(R.id.hang_up).setOnClickListener {
+            // Terminates the call, whether it is ringing or running
+            core.currentCall?.terminate()
+        }
+
+        findViewById<Button>(R.id.answer).setOnClickListener {
+            // if we wanted, we could create a CallParams object
+            // and answer using this object to make changes to the call configuration
+            // (see OutgoingCall tutorial)
+            core.currentCall?.accept()
+        }
+
+        findViewById<Button>(R.id.mute_mic).setOnClickListener {
+            // The following toggles the microphone, disabling completely / enabling the sound capture
+            // from the device microphone
+//            core.s(!core.micEnabled())
+        }
+
+        findViewById<Button>(R.id.toggle_speaker).setOnClickListener {
+            toggleSpeaker()
+        }
+    }
+
+    private fun toggleSpeaker() {
+        // Get the currently used audio device
+        val currentAudioDevice = core.currentCall?.outputAudioDevice
+        val speakerEnabled = currentAudioDevice?.type == AudioDevice.Type.Speaker
+
+        // We can get a list of all available audio devices using
+        // Note that on tablets for example, there may be no Earpiece device
+        for (audioDevice in core.audioDevices) {
+            if (speakerEnabled && audioDevice.type == AudioDevice.Type.Earpiece) {
+                core.currentCall?.outputAudioDevice = audioDevice
+                return
+            } else if (!speakerEnabled && audioDevice.type == AudioDevice.Type.Speaker) {
+                core.currentCall?.outputAudioDevice = audioDevice
+                return
+            }/* If we wanted to route the audio to a bluetooth headset
+            else if (audioDevice.type == AudioDevice.Type.Bluetooth) {
+                core.currentCall?.outputAudioDevice = audioDevice
+            }*/
         }
     }
 
