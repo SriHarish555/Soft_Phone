@@ -56,14 +56,13 @@ class MainActivity : AppCompatActivity()  {
 
                     findViewById<Button>(R.id.pause).isEnabled = true
                     findViewById<Button>(R.id.pause).text = "Pause"
-                    findViewById<Button>(R.id.toggle_video).isEnabled = true
 
                    //                    findViewById<Button>(R.id.toggle_camera).isEnabled = core.videoDevicesList.size > 2 && call.currentParams.videoEnabled()
                 }
                 Call.State.Paused -> {
                     // When you put a call in pause, it will became Paused
                     findViewById<Button>(R.id.pause).text = "Resume"
-                    findViewById<Button>(R.id.toggle_video).isEnabled = false
+
                 }
                 Call.State.PausedByRemote -> {
 
@@ -80,9 +79,8 @@ class MainActivity : AppCompatActivity()  {
                     findViewById<Button>(R.id.call).isEnabled = true
                     findViewById<Button>(R.id.pause).isEnabled = false
                     findViewById<Button>(R.id.pause).text = "Pause"
-                    findViewById<Button>(R.id.toggle_video).isEnabled = false
                     findViewById<Button>(R.id.hang_up).isEnabled = false
-                    findViewById<Button>(R.id.toggle_camera).isEnabled = false
+
                 }
                 Call.State.IncomingReceived -> {
                     findViewById<Button>(R.id.hang_up).isEnabled = true
@@ -128,7 +126,6 @@ class MainActivity : AppCompatActivity()  {
         }
 
         findViewById<Button>(R.id.pause).isEnabled = false
-        findViewById<Button>(R.id.toggle_video).isEnabled = false
         findViewById<Button>(R.id.hang_up).isEnabled = false
     }
 
