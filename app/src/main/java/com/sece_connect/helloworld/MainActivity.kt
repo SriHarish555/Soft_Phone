@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity()  {
                 else -> {}
             }
         }
-    }
+}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
